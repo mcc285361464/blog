@@ -1,0 +1,21 @@
+{
+  "name": "blog",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^11.0.1",
+    "cookie-parser": "^1.4.3",
+    "debug": "^2.6.9",
+    "ejs": "^2.5.9",
+    "express": "^4.16.3",
+    "express-session": "^1.15.6",
+    "http-errors": "^1.6.3",
+    "morgan": "^1.9.0",
+    "multiparty": "^4.2.1",
+    "mysql": "^2.16.0",
+    "session-file-store": "^1.2.0"
+  }
+}

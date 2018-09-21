@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>写博客</title>
+    <!-- <script src="https://cdn.ckeditor.com/ckeditor5/11.0.1/classic/ckeditor.js"></script> -->
+    <script src="javascripts/ckeditor5-build-classic/ckeditor.js"></script>
+    <style>
+        input[type="submit"] {
+            height: 100px;
+            margin-top: 50px;
+            width: 300px;
+        }
+
+        input[type="text"] {
+            height: 50px;
+            width: 80%;
+        }
+
+        textarea[name="intro"] {
+            height: 100px;
+            width: 80%;
+        }
+
+        form {
+            width: 60%; 
+            margin: 0 auto;
+        }
+        
+        .ck-editor__editable {
+            min-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <h1>写博客</h1>
+    <form action="/submitBlog" method="post">
+        <h3>标题</h3>
+        <input type="text" name="title" />
+        <h3>简介</h3>
+        <textarea type="text" name="intro" ></textarea>
+        <h3>type</h3>
+        <input type="text" name="type" />
+        <select name="type_select">
+            <% if (types.length) { %>
+                <% types.forEach(function(t){ %>
+                    <option><%= t.type %></option>
+                <% }) %>
+            <% } %>
+        </select>
+        <h3>博客内容</h3>
+        <textarea name="content" id="editor"></textarea>
+
+        <!--  <h3>封面图片</h3>
+        <input type="text" name="img" /> -->
+        <h3>meta keywords</h3>
+        <input type="text" name="metaK" />
+
+        <h3>meta description</h3>
+        <input type="text" name="metaD" />
+
+        <input type="submit" value="Submit"/>
+    </form>
+    <script>
+        ClassicEditor
+            .create( document.querySelector( '#editor' ) , {
+	            ckfinder: {
+	               uploadUrl : '/admin/image_upload'
+	            },
+                height: '500px'
+	        } )
+	        .then( newEditor => {
+		        editor = newEditor;
+		    } )
+            .catch( error => {
+                console.error( error );
+            } );
+    </script>
+</body>
+</html>

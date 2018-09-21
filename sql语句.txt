@@ -1,0 +1,26 @@
+//建立博客表
+create table blog_item(
+	blog_id INT NOT NULL AUTO_INCREMENT,
+	title VARCHAR(50) NOT NULL,
+	intro VARCHAR(100) NOT NULL,
+	img VARCHAR(70),
+	type VARCHAR(30),
+	date VARCHAR(30) NOT NULL,
+	html_name VARCHAR(50) NOT NULL,
+	PRIMARY KEY ( blog_id )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+insert into blog_item (title,intro,img,type,date,html_name)value('demo title','demo intro','/images/demo.img','人工智能','2018-08-26','demo.html');
+
+select * from blog_item where type='人工智能'  order by blog_id desc limit 1,1;
+
+//博客评论表
+create table blog_comments(
+	comment_id INT NOT NULL AUTO_INCREMENT,
+	username VARCHAR(20) NOT NULL,
+	content VARCHAR(200) NOT NULL,
+	item_id INT NOT NULL,
+	PRIMARY KEY ( comment_id )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
