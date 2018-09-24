@@ -233,6 +233,31 @@ router.post('/adminLogin', function(req, res, next){
         
 });
 
+router.post('/updateBlog', function(req, res, next){
+    res.render('update');       
+});
+
+
+router.post('/updateBlogItem', function(req, res, next){
+    var fileName = req.body.fileName;
+    var filePath = __dirname.substring(0,__dirname.length-6) + 'views/blogs/' + fileName;
+    console.log(filePath);
+    var data = fs.readFileSync(filePath, 'utf8');
+    console.log(data);
+    var connection = mysql.createConnection({
+      host     : 'localhost',
+      user     : 'root',
+      password : '19940426',
+      database : 'blog',
+      multipleStatements: true  
+    });
+    connection.connect();
+    connection.query('select * from blog_item where html_name= "' + fileName + '";select distinct(type) from blog_item;', function (error, results, fields) {
+      if (error) throw error;
+      res.render('updateItem', { blogs: results[0] , types: results[1] });       
+    });
+    connection.end();             
+});
 
 //随机数
 function RandNum(n){
