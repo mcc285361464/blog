@@ -90,7 +90,7 @@
 							<div class="image-box"><img src='<%= blog.img %>' alt=""></div>
 							<div class="post-meta-box bg-box">
 								<ul class="author-meta clearfix">
-									<li class="tag"><a href="#"><%= blog.type %></a></li>
+									<li class="tag"><a href=<%= '/category?type='+ encodeURIComponent(blog.type) %>><%= blog.type %></a></li>
 									<li class="date"><%= blog.date %></li>
 								</ul>
 								<h4 class="title"><a href='<%= 'blogs/' + blog.html_name %>'><%= blog.title %></a></h4>

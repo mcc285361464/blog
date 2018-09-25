@@ -3,6 +3,7 @@ var mysql      = require('mysql');
 var multiparty = require('multiparty');
 var util = require('util');
 var fs = require('fs');
+var cheerio = require('cheerio');
 
 
 var users = require('./login').items;
@@ -150,40 +151,55 @@ router.post('/admin/image_upload', function(req, res, next) {
 });
 
 router.get('/index', function(req, res, next) {
+    // console.log('indexCount1:'+totalCount);
+
     var lis = req.query.contentNum;
 
     var type = req.query.type;
-    console.log(type);
     type = decodeURIComponent(type);
     var sql = '';
     if(type == 'null') {
-        sql = 'select * from blog_item order by blog_id desc limit ' + lis + ',' + PAGEADDCOUNT + ';'
+        sql = 'select * from blog_item order by blog_id desc limit ' + lis + ',' + PAGEADDCOUNT + ';select count(*) from blog_item where type="' + type + '";';
     }else {
-        sql = 'select * from blog_item where type = "' + type + '" order by blog_id desc limit ' + lis + ',' + PAGEADDCOUNT + ';';
+        sql = 'select * from blog_item where type = "' + type + '" order by blog_id desc limit ' + lis + ',' + PAGEADDCOUNT + ';select count(*) from blog_item where type="' + type + '";';
     }
-    console.log(sql+'!'+totalCount+'!'+lis);
+    // console.log('indexCount2:'+totalCount);
 
-    if(totalCount<=lis) {
-        res.json({
+    // if(totalCount<=lis) {
+    //     res.json({
+    //         'noContent':1
+    //     });
+    // }else {
+    // }
+
+    var connection = mysql.createConnection({
+      host     : 'localhost',
+      user     : 'root',
+      password : '19940426',
+      database : 'blog',
+      multipleStatements: true
+    });
+    connection.connect();
+    connection.query(sql, function (error, results, fields) {
+      if (error) { 
+        throw error;
+      }else {
+        var count = JSON.stringify(results[1][0]);
+        count = count.replace(/.*:/ig,'').replace(/}/ig,'');
+        count = +count;
+        console.log(count,'---',lis);
+        if(count<=lis){
+           res.json({
             'noContent':1
-        });
-    }else {
-        var connection = mysql.createConnection({
-          host     : 'localhost',
-          user     : 'root',
-          password : '19940426',
-          database : 'blog',
-          multipleStatements: true
-        });
-        connection.connect();
-        connection.query(sql, function (error, results, fields) {
-          if (error) throw error;
+           });
+        }else {
           res.json({
             'results': results
           });  
-        });
-        connection.end();
-    }
+        }
+      }
+    });
+    connection.end();
 });
 
 
@@ -203,10 +219,13 @@ router.get('/category', function(req, res, next) {
       totalCount = JSON.stringify(results[2][0]);
       totalCount = totalCount.replace(/.*:/ig,'').replace(/}/ig,'');
       totalCount = +totalCount;
+      console.log('totalCount:'+totalCount);
       res.render('index', { blogs: results[0] , types: results[1] , counts: results[2] });       
-      
     });
+    console.log('totalCount2:'+totalCount);
+
     connection.end();
+    console.log('totalCount3:'+totalCount);
 });
 
 router.post('/adminLogin', function(req, res, next){
@@ -243,7 +262,12 @@ router.post('/updateBlogItem', function(req, res, next){
     var filePath = __dirname.substring(0,__dirname.length-6) + 'views/blogs/' + fileName;
     console.log(filePath);
     var data = fs.readFileSync(filePath, 'utf8');
-    console.log(data);
+    //var doc = (new DOMParser()).parseFromString(data,'text/html');
+    var $ = cheerio.load(data);
+
+    var keywords = $('meta[name="keywords"]').attr('content');
+    var description = $('meta[name="description"]').attr('content');
+    var content = $('.content').html();
     var connection = mysql.createConnection({
       host     : 'localhost',
       user     : 'root',
@@ -254,9 +278,80 @@ router.post('/updateBlogItem', function(req, res, next){
     connection.connect();
     connection.query('select * from blog_item where html_name= "' + fileName + '";select distinct(type) from blog_item;', function (error, results, fields) {
       if (error) throw error;
-      res.render('updateItem', { blogs: results[0] , types: results[1] });       
+
+      res.render('updateItem', { blogs: results[0] , types: results[1] ,keywords : keywords , description : description ,content :''+content ,fileName : fileName});       
     });
     connection.end();             
+});
+
+
+router.post('/submitBlogUpdate', function(req, res, next) {
+
+    var namePath =  req.body.fileName;
+    var realPath = './views/blogs/' + namePath;
+    
+    var content = req.body.content;
+    var title = req.body.title;
+    var intro = req.body.intro;
+    var img = req.body.img;
+    var metaK = req.body.metaK;
+    var metaD = req.body.metaD;
+    var type = req.body.type || req.body.type_select;
+    var date = getNowFormatDate();
+
+    content = `
+        <!DOCTYPE html>
+            <html>
+            <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <link rel="stylesheet" type="text/css" href="../../stylesheets/mcc_custom.css" /><meta name="keywords" content="`
+    +  metaK + `"> <meta name="description" content="` + metaD + 
+                `"><title>` + title + `</title>
+            </head>
+            <body>
+            <div class="header">
+                
+            </div>
+
+            <div class="main-content"><div class="content-title">` + title + `</div>
+    <div class="content">
+    ` + content + `</div>
+            </div>
+            </body>
+            <script src="../../javascripts/vendor/jquery.2.2.3.min.js"></script>
+            <script src="../../javascripts/js/public_share_code.js"></script>
+
+        </html> `;
+
+    var imgReg = /<img.*?(?:>|\/>)/gi;
+    var srcReg = /src=[\'\"]?([^\'\"]*)[\'\"]?/i;
+    var imgR = content.match(imgReg);
+    var imgsrc = ''
+    if(imgR && imgR.length > 0) {
+        imgsrc = imgR[0].match(srcReg)[1];
+    }
+
+    fs.writeFile(realPath, content,function(err){
+        if(err) console.log('写文件操作失败');
+        else console.log('写文件操作成功');
+    });
+    //insert into blog_item (title,intro,img,type,date,html_name)value('demo title','demo intro','/images/demo.img','人工智能','2018-08-26','demo.html');
+    //UPDATE Person SET Address = 'Zhongshan 23', City = 'Nanjing' WHERE LastName = 'Wilson'
+    var sql = 'update blog_item set title="' + title + '",intro="'+ intro +'",img="'+ imgsrc +'",type="'+ type +'",date="' + date +'" where html_name="'+namePath+'"';
+    console.log(sql);
+    var connection = mysql.createConnection({
+      host     : 'localhost',
+      user     : 'root',
+      password : '19940426',
+      database : 'blog'
+    });
+    connection.connect();
+    connection.query(sql, function (error, results, fields) {
+      if (error) throw error;
+      res.redirect('/');       
+    });
+    connection.end();
+
 });
 
 //随机数

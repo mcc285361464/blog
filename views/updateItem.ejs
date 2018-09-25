@@ -42,13 +42,13 @@
             </li>
         </ul>
     </div>
-    <form action="/submitBlog" method="post">
+    <form action="/submitBlogUpdate" method="post">
         <h3>标题</h3>
-        <input type="text" name="title" />
+        <input type="text" name="title" value=<%= blogs[0].title %>></input>
         <h3>简介</h3>
-        <textarea type="text" name="intro" ></textarea>
+        <textarea type="text" name="intro"><%= blogs[0].intro %></textarea>
         <h3>type</h3>
-        <input type="text" name="type" />
+        <input type="text" name="type" value=<%= blogs[0].type %>></input>
         <select name="type_select">
             <% if (types.length) { %>
                 <% types.forEach(function(t){ %>
@@ -62,12 +62,17 @@
         <!--  <h3>封面图片</h3>
         <input type="text" name="img" /> -->
         <h3>meta keywords</h3>
-        <input type="text" name="metaK" />
+        <input type="text" name="metaK"></input>
 
         <h3>meta description</h3>
-        <input type="text" name="metaD" />
+        <input type="text" name="metaD"></input>
 
         <input type="submit" value="Submit"/>
+        <div id="hidden_content" style="display: none;"><%= content %></div>
+        <input type="hidden" name="fileName" id="hidden_fileName" value=<%= fileName %> ></input>
+        <div id="hidden_metaK" style="display: none;"><%= keywords %></div>
+        <div id="hidden_metaD" style="display: none;"><%= description %></div>
+
     </form>
     <script>
         ClassicEditor
@@ -79,9 +84,12 @@
 	        } )
 	        .then( newEditor => {
 		        editor = newEditor;
+                var htmlStr = document.querySelector('#hidden_content').textContent;
+                editor.setData(htmlStr);
 		    } )
             .catch( error => {
                 console.error( error );
+
             } );
 
         document.querySelector('#update_a').onclick = function(){
@@ -91,6 +99,10 @@
             document.body.appendChild(form);
             form.submit();
         }
+
+        document.querySelector('[name="metaK"]').value = document.querySelector('#hidden_metaK').textContent;
+        document.querySelector('[name="metaD"]').value = document.querySelector('#hidden_metaD').textContent;
+
     </script>
 </body>
 </html>
