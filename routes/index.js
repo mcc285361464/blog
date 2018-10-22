@@ -100,7 +100,7 @@ router.post('/submitBlog', function(req, res, next) {
             else console.log('写文件操作成功');
         });
         //insert into blog_item (title,intro,img,type,date,html_name)value('demo title','demo intro','/images/demo.img','人工智能','2018-08-26','demo.html');
-        var sql = 'insert into blog_item (title,intro,img,type,date,html_name)value("' + title + '","' + intro + '","' + imgsrc + '","' + type + '","' + date + '","' + namePath + '")';
+        var sql = "insert into blog_item (title,intro,img,type,date,html_name)value('" + title + "','" + intro + "','" + imgsrc + "','" + type + "','" + date + "','" + namePath + "')";
 
         var connection = mysql.createConnection({
           host     : 'localhost',
@@ -175,9 +175,9 @@ router.get('/index', function(req, res, next) {
         type = decodeURIComponent(type);
         var sql = '';
         if(type == 'null') {
-            sql = 'select * from blog_item order by blog_id desc limit ' + lis + ',' + PAGEADDCOUNT + ';select count(*) from blog_item where type="' + type + '";';
+            sql = "select * from blog_item order by blog_id desc limit " + lis + "," + PAGEADDCOUNT + ";select count(*) from blog_item where type='" + type + "';";
         }else {
-            sql = 'select * from blog_item where type = "' + type + '" order by blog_id desc limit ' + lis + ',' + PAGEADDCOUNT + ';select count(*) from blog_item where type="' + type + '";';
+            sql = "select * from blog_item where type = '" + type + "' order by blog_id desc limit " + lis + "," + PAGEADDCOUNT + ";select count(*) from blog_item where type='" + type + "';";
         }
         // console.log('indexCount2:'+totalCount);
 
@@ -233,7 +233,7 @@ router.get('/category', function(req, res, next) {
       multipleStatements: true
     });
     connection.connect();
-    connection.query('select * from blog_item where type = "' + type + '" order by blog_id desc limit ' + PAGELISTCOUNT + ';select distinct(type) from blog_item;select count(*) from blog_item where type="'+ type + '";', function (error, results, fields) {
+    connection.query("select * from blog_item where type = '" + type + "' order by blog_id desc limit " + PAGELISTCOUNT + ";select distinct(type) from blog_item;select count(*) from blog_item where type='"+ type + "';", function (error, results, fields) {
       if (error) throw error;
       totalCount = JSON.stringify(results[2][0]);
       totalCount = totalCount.replace(/.*:/ig,'').replace(/}/ig,'');
@@ -292,7 +292,7 @@ router.post('/updateBlogItem', function(req, res, next){
           multipleStatements: true  
         });
         connection.connect();
-        connection.query('select * from blog_item where html_name= "' + fileName + '";select distinct(type) from blog_item;', function (error, results, fields) {
+        connection.query("select * from blog_item where html_name= '" + fileName + "';select distinct(type) from blog_item;", function (error, results, fields) {
           if (error) throw error;
 
           res.render('updateItem', { blogs: results[0] , types: results[1] ,keywords : keywords , description : description ,content :''+content ,fileName : fileName});       
@@ -356,7 +356,7 @@ router.post('/submitBlogUpdate', function(req, res, next) {
         });
         //insert into blog_item (title,intro,img,type,date,html_name)value('demo title','demo intro','/images/demo.img','人工智能','2018-08-26','demo.html');
         //UPDATE Person SET Address = 'Zhongshan 23', City = 'Nanjing' WHERE LastName = 'Wilson'
-        var sql = 'update blog_item set title="' + title + '",intro="'+ intro +'",img="'+ imgsrc +'",type="'+ type +'",date="' + date +'" where html_name="'+namePath+'"';
+        var sql = "update blog_item set title='" + title + "',intro='"+ intro +"',img='"+ imgsrc +"',type='"+ type +"',date='" + date +"' where html_name='"+namePath+"'";
         var connection = mysql.createConnection({
           host     : 'localhost',
           user     : 'root',
