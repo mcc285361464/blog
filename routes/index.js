@@ -31,7 +31,7 @@ router.get('/', function(req, res, next) {
           multipleStatements: true
     	});
     	connection.connect();
-    	connection.query('select * from blog_item order by blog_id desc limit ' + PAGELISTCOUNT + ';select distinct(type) from blog_item;select count(*) from blog_item', function (error, results, fields) {
+    	connection.query("select * from blog_item order by blog_id desc limit " + PAGELISTCOUNT + ";select distinct(type) from blog_item;select count(*) from blog_item", function (error, results, fields) {
     	  if (error) throw error;
           totalCount = JSON.stringify(results[2][0]);
           totalCount = totalCount.replace(/.*:/ig,'').replace(/}/ig,'');
@@ -170,14 +170,16 @@ router.get('/index', function(req, res, next) {
 
     try {
         var lis = req.query.contentNum;
-
+        console.log(lis);
         var type = req.query.type;
         type = decodeURIComponent(type);
         var sql = '';
         if(type == 'null') {
             sql = "select * from blog_item order by blog_id desc limit " + lis + "," + PAGEADDCOUNT + ";select count(*) from blog_item where type='" + type + "';";
+            console.log('sql1:'+sql);
         }else {
             sql = "select * from blog_item where type = '" + type + "' order by blog_id desc limit " + lis + "," + PAGEADDCOUNT + ";select count(*) from blog_item where type='" + type + "';";
+            console.log('sql2:'+sql);
         }
         // console.log('indexCount2:'+totalCount);
 
