@@ -171,6 +171,10 @@ router.get('/index', function(req, res, next) {
     try {
         var lis = req.query.contentNum;
         console.log(lis);
+        var reg = /^\d+$/;
+        if(!reg.test(lis)) {
+            lis = 0;
+        }
         var type = req.query.type;
         type = decodeURIComponent(type);
         var sql = '';
