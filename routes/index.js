@@ -231,23 +231,31 @@ router.get('/index', function(req, res, next) {
 router.get('/category', function(req, res, next) {
     var type = req.query.type;
     type = decodeURIComponent(type);
-    var connection = mysql.createConnection({
-      host     : 'localhost',
-      user     : 'root',
-      password : '19940426',
-      database : 'blog',
-      multipleStatements: true
-    });
-    connection.connect();
-    connection.query("select * from blog_item where type = '" + type + "' order by blog_id desc limit " + PAGELISTCOUNT + ";select distinct(type) from blog_item;select count(*) from blog_item where type='"+ type + "';", function (error, results, fields) {
-      if (error) throw error;
-      totalCount = JSON.stringify(results[2][0]);
-      totalCount = totalCount.replace(/.*:/ig,'').replace(/}/ig,'');
-      totalCount = +totalCount;
-      res.render('index', { blogs: results[0] , types: results[1] , counts: results[2] });       
-    });
-
-    connection.end();
+    var reg = /^[\u4e00-\u9fa5_a-zA-Z0-9]+$/;
+    if(reg.test(type)) {
+        var connection = mysql.createConnection({
+          host     : 'localhost',
+          user     : 'root',
+          password : '19940426',
+          database : 'blog',
+          multipleStatements: true
+        });
+        connection.connect();
+        connection.query("select * from blog_item where type = '" + type + "' order by blog_id desc limit " + PAGELISTCOUNT + ";select distinct(type) from blog_item;select count(*) from blog_item where type='"+ type + "';", function (error, results, fields) {
+          if (error) {throw error;}
+          if(results[2]){
+              totalCount = JSON.stringify(results[2][0]);
+              totalCount = totalCount.replace(/.*:/ig,'').replace(/}/ig,'');
+              totalCount = +totalCount;
+              res.render('index', { blogs: results[0] , types: results[1] , counts: results[2] });       
+          }else{
+              res.redirect('/');
+          }
+        });
+        connection.end();
+    }else {
+        res.redirect('/');
+    }
 });
 
 router.post('/adminLogin', function(req, res, next){
